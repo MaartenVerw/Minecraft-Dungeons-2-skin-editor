@@ -1,0 +1,13 @@
+{
+  "comment": "Archive keys for Minecraft Dungeons II. Found with tools/find_aes_key.py from the maintainer's own copy of the game. The app tries matching entries first, then every key.",
+  "keys": [
+    {
+      "edition": "WinGDK",
+      "gameVersionHint": "1.1.1.0",
+      "utocSize": 17308430,
+      "containerId": "0x829066CF1C97CDE0",
+      "key": "0x1F81803353095534B0544C9E26088A3D4DB069C9727D38DE649CB18E4FD4A3EC",
+      "added": "2026-09-30"
+    }
+  ]
+}

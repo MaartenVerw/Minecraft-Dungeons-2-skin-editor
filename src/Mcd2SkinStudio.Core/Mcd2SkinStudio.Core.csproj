@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Mcd2SkinStudio.Core</RootNamespace>
+    <!-- the vendored Oodle decoder uses pointers -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\vendor\OodleSharp\OodleDecompressor.cs" Link="Vendor\OodleDecompressor.cs" />
+    <EmbeddedResource Include="..\..\keys.json" LogicalName="keys.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mcd2SkinStudio.Tests" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>mcd2skin</AssemblyName>
+    <RootNamespace>Mcd2SkinStudio.Cli</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mcd2SkinStudio.Core\Mcd2SkinStudio.Core.csproj" />
+  </ItemGroup>
+
+</Project>

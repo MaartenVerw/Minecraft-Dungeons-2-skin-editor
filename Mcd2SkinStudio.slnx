@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Mcd2SkinStudio.Cli/Mcd2SkinStudio.Cli.csproj" />
+    <Project Path="src/Mcd2SkinStudio.Core/Mcd2SkinStudio.Core.csproj" />
+  </Folder>
+</Solution>

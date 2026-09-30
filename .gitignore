@@ -1,0 +1,12 @@
+bin/
+obj/
+*.user
+.vs/
+publish/
+# Game assets are never committed: golden test files and spike output stay local
+tests/golden/
+spike-out/
+*.uasset
+*.utoc
+*.ucas
+*.pak
