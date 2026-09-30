@@ -9,6 +9,8 @@
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <ApplicationVisualStyles>true</ApplicationVisualStyles>
     <ApplicationDefaultFont>Segoe UI, 9.75pt</ApplicationDefaultFont>
+    <!-- no designer files: every control is built in code -->
+    <NoWarn>$(NoWarn);WFO1000</NoWarn>
   </PropertyGroup>
 
   <!-- dotnet publish -c Release: one self-contained exe, nothing to install -->

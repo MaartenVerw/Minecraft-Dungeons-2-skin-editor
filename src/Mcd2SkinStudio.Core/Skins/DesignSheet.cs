@@ -35,26 +35,8 @@ public static class DesignSheet
     public static int Height => Layout.Value.Height;
     public static IReadOnlyList<Cell> Cells => Layout.Value.Cells;
 
-    static (int W, int H, int D) Dims(Part p)
-    {
-        var front = SkinGeometry.Get(p, Face.Front);
-        return (front.W, front.H, SkinGeometry.Get(p, Face.Right).W);
-    }
-
-    /// <summary>Face rectangles inside a net, in squares: TOP above FRONT; RIGHT, FRONT, LEFT, BACK in a row; BOTTOM below FRONT.</summary>
-    static (int X, int Y) FaceOrigin(Part p, Face f)
-    {
-        var (w, h, d) = Dims(p);
-        return f switch
-        {
-            Face.Top => (d, 0),
-            Face.Right => (0, d),
-            Face.Front => (d, d),
-            Face.Left => (d + w, d),
-            Face.Back => (2 * d + w, d),
-            _ => (d, d + h),
-        };
-    }
+    static (int W, int H, int D) Dims(Part p) => SkinGeometry.Dims(p);
+    static (int X, int Y) FaceOrigin(Part p, Face f) => SkinGeometry.NetOrigin(p, f);
 
     static LayoutData BuildLayout()
     {

@@ -78,7 +78,7 @@ sealed class HomePage : FlowLayoutPanel
         grid.Margin = new Padding(0, 0, 0, 8);
         if (S.State.Skins.Count == 0)
         {
-            grid.Controls.Add(Ui.Card(Ui.Label("No custom skins yet. Press “Make a new skin” to start: you'll get a design sheet of the hero, paint it in Paint, and upload it back.", null, Ui.Muted, 520)));
+            grid.Controls.Add(Ui.Card(Ui.Label("No custom skins yet. Press “Make a new skin” to start: pick a hero, paint it right here in the app, and install it.", null, Ui.Muted, 520)));
             return grid;
         }
         foreach (var saved in S.State.Skins)
@@ -116,7 +116,7 @@ sealed class HomePage : FlowLayoutPanel
 
     async Task RemoveAll()
     {
-        if (!_f.Ask("Remove all your custom skins from the game? Every hero goes back to its normal look, and your saved skins are forgotten.\n\n(The PNG files in Documents\\MCD2 Skin Studio are kept.)")) return;
+        if (!_f.Ask("Remove all your custom skins from the game? Every hero goes back to its normal look, and your saved skins are forgotten.")) return;
         int n = 0;
         if (await _f.Busy("Removing all custom skins…", () => { n = S.RemoveAll(); }))
             _f.Info("All custom skins were removed. The game looks normal again.");

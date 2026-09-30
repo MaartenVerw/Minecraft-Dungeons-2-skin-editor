@@ -128,6 +128,13 @@ public sealed class Studio : IDisposable
 
     public RgbaImage Original(SkinEntry s) => TextureIO.ExtractSkin(Archive().ReadPackage(s.TexturePath));
 
+    /// <summary>The user's saved version of this skin, or null when they haven't made one.</summary>
+    public RgbaImage? Saved(SkinEntry s)
+    {
+        var saved = State.Skins.FirstOrDefault(x => x.Key.Equals(s.Key, StringComparison.OrdinalIgnoreCase));
+        return saved == null ? null : State.LoadImage(saved);
+    }
+
     /// <summary>
     /// Saves the design sheet and the 64×64 texture to Documents\MCD2 Skin Studio\&lt;skin&gt;. When the
     /// user already has a custom version, the sheet starts from it and the original sheet is saved too.
@@ -136,8 +143,7 @@ public sealed class Studio : IDisposable
     public ExportResult Export(SkinEntry s, string? baseDir = null)
     {
         var original = Original(s);
-        var saved = State.Skins.FirstOrDefault(x => x.Key.Equals(s.Key, StringComparison.OrdinalIgnoreCase));
-        var mine = saved == null ? null : State.LoadImage(saved);
+        var mine = Saved(s);
         var start = mine ?? original;
         var dir = Path.Combine(baseDir ?? AppPaths.ExportDir, s.FileStem);
         Directory.CreateDirectory(dir);

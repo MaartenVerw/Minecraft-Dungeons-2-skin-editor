@@ -80,6 +80,35 @@ public static class SkinGeometry
 
     public static FaceMap Get(Part p, Face f) => Faces.First(x => x.Part == p && x.Face == f);
 
+    /// <summary>Front width, height and depth of a part, in texels.</summary>
+    public static (int W, int H, int D) Dims(Part p)
+    {
+        var front = Get(p, Face.Front);
+        return (front.W, front.H, Get(p, Face.Right).W);
+    }
+
+    /// <summary>The part unfolded like a paper model (in squares): TOP above FRONT; RIGHT, FRONT, LEFT,
+    /// BACK in a row; BOTTOM below FRONT. Strokes across an edge continue around the part.</summary>
+    public static (int X, int Y) NetOrigin(Part p, Face f)
+    {
+        var (w, h, d) = Dims(p);
+        return f switch
+        {
+            Face.Top => (d, 0),
+            Face.Right => (0, d),
+            Face.Front => (d, d),
+            Face.Left => (d + w, d),
+            Face.Back => (2 * d + w, d),
+            _ => (d, d + h),
+        };
+    }
+
+    public static (int W, int H) NetSize(Part p)
+    {
+        var (w, h, d) = Dims(p);
+        return (2 * d + 2 * w, 2 * d + h);
+    }
+
     // ---- face animation: the top-left corner of the texture (traced from the mesh's eye/brow/mouth quads)
     /// <summary>Pupil of the eye on the viewer's left (the hero's right eye).</summary>
     public static readonly (int X, int Y) PupilA = (6, 5);
@@ -104,25 +133,35 @@ public static class SkinGeometry
         for (int y = 0; y < BrowH; y++) for (int x = 0; x < BrowW; x++) yield return (BrowX + x, BrowY + y);
     }
 
+    /// <summary>Where the game draws each face-animation texel on the 8×8 face, in drawing order.</summary>
+    public static IReadOnlyList<(int Col, int Row, (int X, int Y) Texel)> FaceOverlay { get; } = BuildFaceOverlay();
+
+    static List<(int, int, (int, int))> BuildFaceOverlay()
+    {
+        // eyes on row 4: whites 2 px per eye, pupils on the inner pixel; mouth on row 6
+        List<(int, int, (int, int))> o =
+        [
+            (1, 4, WhiteOuter), (2, 4, WhiteInner), (6, 4, WhiteOuter), (5, 4, WhiteInner),
+            (2, 4, PupilA), (5, 4, PupilB),
+            (3, 6, MouthA), (4, 6, MouthB),
+        ];
+        // eyebrows on rows 2..3: viewer's left as painted, viewer's right mirrored
+        for (int y = 0; y < BrowH; y++)
+            for (int x = 0; x < BrowW; x++)
+            {
+                o.Add((x, 2 + y, (BrowX + x, BrowY + y)));
+                o.Add((7 - x, 2 + y, (BrowX + x, BrowY + y)));
+            }
+        return o;
+    }
+
     /// <summary>The 8×8 front of the head as it looks in the game: face texture, then eye whites,
     /// pupils, mouth and eyebrows from the animation corner, then the hat on top.</summary>
     public static RgbaImage FaceAsSeen(RgbaImage skin, bool withHat = true)
     {
         var o = FaceImage(skin, Get(Part.Head, Face.Front));
-        void Put(int col, int row, (int X, int Y) t) => o.Set(col, row, RgbaImage.Blend(o.Get(col, row), skin.Get(t.X, t.Y)));
-        // eyes on row 4: whites 2 px per eye, pupils on the inner pixel
-        Put(1, 4, WhiteOuter); Put(2, 4, WhiteInner); Put(6, 4, WhiteOuter); Put(5, 4, WhiteInner);
-        Put(2, 4, PupilA); Put(5, 4, PupilB);
-        // mouth on row 6
-        Put(3, 6, MouthA); Put(4, 6, MouthB);
-        // eyebrows on rows 2..3: viewer's left as painted, viewer's right mirrored
-        for (int y = 0; y < BrowH; y++)
-            for (int x = 0; x < BrowW; x++)
-            {
-                var t = (BrowX + x, BrowY + y);
-                Put(x, 2 + y, t);
-                Put(7 - x, 2 + y, t);
-            }
+        foreach (var (col, row, t) in FaceOverlay)
+            o.Set(col, row, RgbaImage.Blend(o.Get(col, row), skin.Get(t.X, t.Y)));
         if (withHat) o.Composite(FaceImage(skin, Get(Part.Hat, Face.Front)), 0, 0);
         return o;
     }

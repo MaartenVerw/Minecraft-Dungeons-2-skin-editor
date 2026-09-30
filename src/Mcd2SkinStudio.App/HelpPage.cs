@@ -19,21 +19,24 @@ sealed class HelpPage : FlowLayoutPanel
         Controls.Add(Ui.Label("Help", Ui.Title));
 
         Section("How it works",
-            "MCD2 Skin Studio copies a hero's texture out of your own game, lets you paint it, and puts your version in the game's “~mods” folder. " +
+            "MCD2 Skin Studio copies a hero's look out of your own game, lets you paint it in the built-in editor, and puts your version in the game's “~mods” folder. " +
             "The game's own files are never changed. “Remove all custom skins” deletes only the files this app made.");
-        Section("The design sheet",
-            "•  Every square on the design sheet is one pixel of your hero. Paint inside the squares; the grid lines don't matter.\n" +
-            "•  Each body part is unfolded like a paper model: the big middle square is the front, the top and bottom are above and below it, " +
+        Section("The editor",
+            "•  Every square is one pixel of your hero. Pick a part with the tabs above the squares, or click that part on the preview.\n" +
+            "•  Each part is unfolded like a paper model: the big middle square is the front, the top and bottom are above and below it, " +
             "and the sides and back are next to it. Right and left are the hero's own right and left.\n" +
-            "•  The front and back previews on the sheet show where everything ends up.\n" +
-            "•  Keep head, body, arms and legs solid. The hat layer and the eyebrows may have empty (checkered) squares.\n" +
-            "•  Save as PNG and never resize or crop the sheet. Windows 11 Paint (with layers) or photopea.com both work.");
+            "•  Brush (B): click or drag to paint squares. Fill (F): colours all touching squares of the same colour. " +
+            "Eraser (E): empties hat and face squares; on other parts it puts the game's colour back.\n" +
+            "•  Pick a colour from the presets, the colour wheel (with the light/dark slider) or type a hex code like #3C8527. " +
+            "Right-click a square to pick up its colour.\n" +
+            "•  The live preview shows your hero from the front and back while you paint. Point at a square and it's marked on the preview.\n" +
+            "•  Undo with Ctrl+Z, redo with Ctrl+Y. “Start over” brings back the game's look.");
         Section("Eyes, eyebrows and mouth",
-            "The head's front has no face on it: the game draws and animates the face from the “Face animation” squares.\n" +
+            "The head's front has no face on it: the game draws and animates the face from the squares under “Face & portrait”.\n" +
             "•  Top line: the pupils (left square = the eye on your left, right square = the eye on your right).\n" +
             "•  Middle line: the eye whites, two pixels per eye (outer and inner; the pupil covers the inner one).\n" +
             "•  Bottom line: the mouth, two pixels in the middle of the face.\n" +
-            "•  The block on the left is the eyebrow shape (4 × 2). It's drawn above both eyes, mirrored for the other eye.\n" +
+            "•  The block on the left is the eyebrow shape (4 × 2). It's drawn above both eyes, mirrored for the other eye. Empty squares = no eyebrow there.\n" +
             "•  The portrait is the small face picture in the Locker. Paint a whole face there, with eyes and mouth.");
         Section("After a game update",
             "Game updates can remove or break custom skins. Open MCD2 Skin Studio: it notices the update and offers Repair, which rebuilds your skins for the new version.");

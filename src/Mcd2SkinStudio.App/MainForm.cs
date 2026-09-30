@@ -6,6 +6,12 @@ using Mcd2SkinStudio.Core.Skins;
 
 namespace Mcd2SkinStudio.App;
 
+/// <summary>A page that may hold unsaved work: asked before the user leaves it.</summary>
+interface IConfirmLeave
+{
+    bool ConfirmLeave();
+}
+
 /// <summary>The window: a header, a scrollable page area (home, wizard or help) and a status line.</summary>
 sealed class MainForm : Form, IElevator
 {
@@ -21,8 +27,9 @@ sealed class MainForm : Form, IElevator
         Icon = Ui.AppIcon();
         BackColor = Ui.Background;
         Font = Ui.Body;
-        MinimumSize = new Size(900, 640);
-        Size = new Size(1080, 780);
+        var screen = Screen.PrimaryScreen?.WorkingArea.Size ?? new Size(1280, 900);
+        MinimumSize = new Size(Math.Min(Ui.Px(1000), screen.Width), Math.Min(Ui.Px(700), screen.Height));
+        Size = new Size(Math.Min(Ui.Px(1220), screen.Width), Math.Min(Ui.Px(880), screen.Height));
         StartPosition = FormStartPosition.CenterScreen;
         AutoScaleMode = AutoScaleMode.Dpi;
 
@@ -35,6 +42,7 @@ sealed class MainForm : Form, IElevator
 
         _status = new Label { Dock = DockStyle.Bottom, Height = 28, Padding = new Padding(16, 6, 16, 0), ForeColor = Ui.Muted, Font = Ui.Small, BackColor = Color.FromArgb(236, 236, 232) };
         _host = new Panel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(28, 20, 28, 20) };
+        _host.Resize += (_, _) => ContentResized?.Invoke(this, EventArgs.Empty);
         Controls.Add(_host);
         Controls.Add(_status);
         Controls.Add(header);
@@ -47,6 +55,8 @@ sealed class MainForm : Form, IElevator
                 e.Cancel = true;
                 Status("Please wait until the current step is finished.");
             }
+            else if (_host.Controls.Count > 0 && _host.Controls[0] is IConfirmLeave page && !page.ConfirmLeave())
+                e.Cancel = true;
         };
         FormClosed += (_, _) => Studio.Dispose();
     }
@@ -74,6 +84,12 @@ sealed class MainForm : Form, IElevator
 
     /// <summary>Usable width for page content, so long text wraps instead of scrolling sideways.</summary>
     public int ContentWidth => Math.Max(600, _host.ClientSize.Width - _host.Padding.Horizontal - SystemInformation.VerticalScrollBarWidth);
+
+    /// <summary>Usable height for page content.</summary>
+    public int ContentHeight => _host.ClientSize.Height - _host.Padding.Vertical;
+
+    /// <summary>Raised when the page area changes size (window resized or maximised).</summary>
+    public event EventHandler? ContentResized;
 
     public void ShowHome() => ShowPage(new HomePage(this));
     public void ShowWizard(SkinEntry? preselect = null) => ShowPage(new WizardPage(this, preselect));
@@ -130,12 +146,6 @@ sealed class MainForm : Form, IElevator
     {
         try { Process.Start(new ProcessStartInfo(target) { UseShellExecute = true }); }
         catch (Exception e) when (e is System.ComponentModel.Win32Exception or InvalidOperationException) { Log.Error("Open " + target, e); }
-    }
-
-    public static void OpenInPaint(string file)
-    {
-        try { Process.Start(new ProcessStartInfo("mspaint.exe", $"\"{file}\"") { UseShellExecute = true }); }
-        catch (Exception e) when (e is System.ComponentModel.Win32Exception or InvalidOperationException) { Open(file); }
     }
 
     public void LaunchGame()

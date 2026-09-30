@@ -21,6 +21,17 @@ static class Ui
     public static readonly Color Bad = Color.FromArgb(252, 225, 222);
     public static readonly Color Selected = Color.FromArgb(214, 236, 204);
 
+    /// <summary>Windows display scaling (1.25 at 125 %). Fonts scale by themselves; fixed pixel sizes use <see cref="Px"/>.</summary>
+    public static readonly float Scale = ReadScale();
+
+    static float ReadScale()
+    {
+        using var g = Graphics.FromHwnd(IntPtr.Zero);
+        return Math.Max(1f, g.DpiX / 96f);
+    }
+
+    public static int Px(int px) => (int)Math.Round(px * Scale, MidpointRounding.AwayFromZero);
+
     public static Font Title => new("Segoe UI Semibold", 18f);
     public static Font H2 => new("Segoe UI Semibold", 13f);
     public static Font Body => new("Segoe UI", 10f);
@@ -68,6 +79,7 @@ static class Ui
         ForeColor = colour ?? Text,
         MaximumSize = new Size(maxWidth, 0),
         Margin = new Padding(0, 0, 0, 6),
+        UseMnemonic = false,   // show "&" as text
     };
 
     public static LinkLabel Link(string text, Action onClick)

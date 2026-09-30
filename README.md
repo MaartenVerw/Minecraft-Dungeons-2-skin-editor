@@ -1,10 +1,10 @@
 # MCD2 Skin Studio
 
-Put your own look on the heroes of **Minecraft Dungeons II**. Pick a hero, paint over its texture in
-Paint, upload it, done. Works with the **Xbox app / Microsoft Store / Minecraft Launcher** version, and
-is built to work with the **Steam** version too (not tested on Steam yet).
+Put your own look on the heroes of **Minecraft Dungeons II**. Pick a hero, paint it in the built-in
+editor, press Install, done. Works with the **Xbox app / Microsoft Store / Minecraft Launcher** version,
+and is built to work with the **Steam** version too (not tested on Steam yet).
 
-- One `.exe`, nothing to install.
+- One `.exe`, nothing to install, no paint program needed.
 - The game's own files are never changed. Skins go in the game's `~mods` folder, and
   **Remove all custom skins** deletes only the files this app made.
 - No game files are included. Everything is read from your own copy of the game.
@@ -13,10 +13,10 @@ is built to work with the **Steam** version too (not tested on Steam yet).
 ## How to use
 
 1. Download `MCD2SkinStudio.exe` from the Releases page and start it. It finds the game by itself.
-2. **Make a new skin** → pick a hero → **Open design sheet in Paint**.
-3. Paint inside the squares and save as PNG. Don't resize the sheet.
-4. Upload the design sheet, check the front/back preview, press **Install**.
-5. Start the game and pick the hero in the Locker.
+2. **Make a new skin** → pick a hero.
+3. Paint it: pick a body part with the tabs, choose a colour and paint the squares. The live preview
+   shows your hero from the front and back while you paint.
+4. Press **Install**, start the game and pick the hero in the Locker.
 
 After a game update, open the app and press **Repair** when it asks.
 
@@ -29,17 +29,27 @@ The exe isn't code-signed yet. Click **More info → Run anyway**. You can check
 Get-FileHash .\MCD2SkinStudio.exe -Algorithm SHA256
 ```
 
-## The design sheet
+## The editor
 
-Every square on the design sheet is one pixel of the hero. Each body part is unfolded like a paper
-model: the big middle square is the front, top and bottom sit above and below it, and the sides and back
-are next to it, all as seen from outside. Right and left are the hero's own. Front and back previews on
-the sheet show where everything ends up.
+Every square is one pixel of the hero. Each body part is unfolded like a paper model: the big middle
+square is the front, top and bottom sit above and below it, and the sides and back are next to it, all
+as seen from outside. Right and left are the hero's own.
+
+| Tool | What it does |
+|---|---|
+| Brush (B) | Click or drag to paint squares |
+| Fill (F) | Colours every touching square of the same colour |
+| Eraser (E) | Empties hat and face-animation squares; on other parts it puts the game's colour back, so the hero never gets holes |
+
+Colours come from the presets, a colour wheel with a light/dark slider, or a hex code. Right-click a
+square to pick up its colour. Point at a square and it's marked on the live preview; click the preview
+to jump to that body part. Ctrl+Z / Ctrl+Y undo and redo.
 
 **Face animation.** The head's front has no eyes or mouth: the game draws and animates them from a few
-pixels in the texture's top-left corner, shown on the sheet as three stacked lines plus a block:
+pixels in the texture's top-left corner, shown under **Face & portrait** as three stacked lines plus a
+block:
 
-| Sheet squares | Game uses them for |
+| Squares | Game uses them for |
 |---|---|
 | Top line (2 squares) | Pupils: the eye on your left, the eye on your right |
 | Middle line (2 squares) | Eye whites: outer and inner pixel of each eye (mirrored); the pupil covers the inner one |
@@ -48,9 +58,10 @@ pixels in the texture's top-left corner, shown on the sheet as three stacked lin
 
 The **portrait** (8 × 8) is the small face picture in the Locker; paint a whole face there.
 
-Experienced skin makers can upload the raw 64×64 texture instead. It is Minecraft's slim-arm layout,
-except that the legs are mirrored with their left and right regions swapped, and the head and hat backs
-are mirrored. The jacket, sleeve and pants layers aren't used by the game.
+The raw texture is Minecraft's slim-arm layout, except that the legs are mirrored with their left and
+right regions swapped, and the head and hat backs are mirrored. The jacket, sleeve and pants layers
+aren't used by the game. The `mcd2skin` command line can still export a printable design sheet and
+install a painted PNG (maintainer tooling).
 
 ## Building
 
