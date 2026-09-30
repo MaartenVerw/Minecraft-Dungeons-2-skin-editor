@@ -6,7 +6,9 @@ using Mcd2SkinStudio.Core.Skins;
 
 namespace Mcd2SkinStudio.Core;
 
-public sealed record ExportResult(string Folder, string Texture, string Preview, string Guide);
+/// <param name="Sheet">The design sheet to paint (starts from the user's saved version when there is one).</param>
+/// <param name="KeptEarlierWork">The sheet file already existed with the user's painting in it, so it was left as it is.</param>
+public sealed record ExportResult(string Folder, string Sheet, string Texture, string? OriginalSheet, bool KeptEarlierWork);
 
 public sealed record InstallResult(int Installed, IReadOnlyList<string> Skipped);
 
@@ -126,20 +128,51 @@ public sealed class Studio : IDisposable
 
     public RgbaImage Original(SkinEntry s) => TextureIO.ExtractSkin(Archive().ReadPackage(s.TexturePath));
 
-    /// <summary>Saves the texture, an 8× preview and the guide to Documents\MCD2 Skin Studio\&lt;skin&gt;.</summary>
+    /// <summary>
+    /// Saves the design sheet and the 64×64 texture to Documents\MCD2 Skin Studio\&lt;skin&gt;. When the
+    /// user already has a custom version, the sheet starts from it and the original sheet is saved too.
+    /// A file the user has painted on is never overwritten.
+    /// </summary>
     public ExportResult Export(SkinEntry s, string? baseDir = null)
     {
-        var img = Original(s);
+        var original = Original(s);
+        var saved = State.Skins.FirstOrDefault(x => x.Key.Equals(s.Key, StringComparison.OrdinalIgnoreCase));
+        var mine = saved == null ? null : State.LoadImage(saved);
+        var start = mine ?? original;
         var dir = Path.Combine(baseDir ?? AppPaths.ExportDir, s.FileStem);
         Directory.CreateDirectory(dir);
-        var tex = Path.Combine(dir, s.FileStem + ".png");
-        var prev = Path.Combine(dir, s.FileStem + "_preview_x8.png");
-        var guide = Path.Combine(dir, s.FileStem + "_guide.png");
-        Png.Save(img, tex);
-        Png.Save(img.ScaleNearest(8), prev);
-        Png.Save(SkinRender.Guide(img), guide);
-        Log.Info($"Exported {s.InternalName} to {dir}");
-        return new ExportResult(dir, tex, prev, guide);
+        var sheet = Path.Combine(dir, s.FileStem + " design sheet.png");
+        var tex = Path.Combine(dir, s.FileStem + " texture 64x64.png");
+        bool kept = !SaveUnlessEdited(DesignSheet.Create(start, s.DisplayName, s.Key), sheet);
+        SaveUnlessEdited(start, tex);
+        string? orig = null;
+        if (mine != null)
+        {
+            orig = Path.Combine(dir, s.FileStem + " design sheet (original).png");
+            SaveUnlessEdited(DesignSheet.Create(original, s.DisplayName, s.Key), orig);
+        }
+        Log.Info($"Exported {s.InternalName} to {dir}{(kept ? " (kept the user's painted sheet)" : "")}");
+        return new ExportResult(dir, sheet, tex, orig, kept);
+    }
+
+    /// <summary>Writes the image unless the file exists with different pixels (the user's work). Returns false when it kept the file.</summary>
+    static bool SaveUnlessEdited(RgbaImage img, string path)
+    {
+        if (File.Exists(path))
+        {
+            try
+            {
+                var existing = Png.Load(path);
+                if (existing.SameAs(img)) return true;
+                return false;
+            }
+            catch (Exception e) when (e is InvalidDataException or IOException or UnauthorizedAccessException)
+            {
+                return false;   // unreadable or locked by a paint program: leave it alone
+            }
+        }
+        Png.Save(img, path);
+        return true;
     }
 
     /// <summary>Remembers an edited skin (copied into AppData) without installing it yet.</summary>

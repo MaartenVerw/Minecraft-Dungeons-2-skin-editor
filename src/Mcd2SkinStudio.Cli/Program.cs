@@ -10,7 +10,7 @@ namespace Mcd2SkinStudio.Cli;
 /// <summary>Command line for testing and maintenance. Uses the same state (%APPDATA%\MCD2SkinStudio) as the app.</summary>
 static class Program
 {
-    const string AppVersion = "0.1.0";
+    const string AppVersion = "0.2.0";
 
     static async Task<int> Main(string[] args)
     {
@@ -50,12 +50,14 @@ static class Program
                         var i = pair.IndexOf('=');
                         if (i < 0) throw new StudioException("Use <skin>=<file.png>");
                         var s = Skin(studio, pair[..i]);
-                        var img = SkinImport.Load(pair[(i + 1)..]);
                         var orig = studio.Original(s);
-                        if (SkinImport.PaletteChanged(orig, img))
+                        var up = SkinImport.Load(pair[(i + 1)..], orig, s.Key);
+                        var img = up.Skin;
+                        if (up.SheetMatchesSkin == false) Console.WriteLine($"  note: this design sheet was made for another skin; using it for {s.DisplayName}");
+                        if (SkinImport.LostTransparency(orig, img) is uint lost)
                         {
-                            Console.WriteLine($"  {s.DisplayName}: face-animation corner changed, restoring the game's (use the app to keep your version)");
-                            img = SkinImport.RestorePalette(orig, img);
+                            Console.WriteLine($"  {s.DisplayName}: transparency was lost (filled with one colour), making those squares transparent again");
+                            img = SkinImport.RestoreTransparency(orig, img, lost);
                         }
                         studio.SaveSkin(s, img);
                     }
@@ -89,6 +91,20 @@ static class Program
                     await Key(studio);
                     Spike.Run(studio.Archive(), rest.FirstOrDefault() ?? "spike-out");
                     return 0;
+                case "iodump":
+                {
+                    // iodump <substring> <outDir>: copy matching packages out of the game's IoStore container (read-only)
+                    await Key(studio);
+                    var a = studio.Archive();
+                    Directory.CreateDirectory(rest[1]);
+                    foreach (var f in a.Reader.Files.Keys.Where(f => f.Contains(rest[0], StringComparison.OrdinalIgnoreCase)))
+                    {
+                        var data = a.ReadPackage(f);
+                        File.WriteAllBytes(Path.Combine(rest[1], Path.GetFileName(f)), data);
+                        Console.WriteLine($"{f}  {data.Length}");
+                    }
+                    return 0;
+                }
                 case "pakdump":
                 {
                     // pakdump <substring> <outDir>: copy matching loose files out of the game's .pak (read-only)
@@ -138,8 +154,8 @@ static class Program
 
               info                         found installs, fingerprint and key status
               list                         skins in the game (key, in-game name, internal name)
-              export [skin|all] [dir]      save texture + 8x preview + guide (default Documents\MCD2 Skin Studio)
-              install <skin>=<png> ...     save edited skins and install every saved skin
+              export [skin|all] [dir]      save design sheet + 64x64 texture (default Documents\MCD2 Skin Studio)
+              install <skin>=<png> ...     save edited skins (design sheet, 64x64 or 512x512) and install all saved skins
               remove <skin>                forget one skin and reinstall the rest
               uninstall                    remove all mod files and forget all saved skins
               status                       start-up health check

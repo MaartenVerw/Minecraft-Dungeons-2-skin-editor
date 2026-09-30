@@ -13,10 +13,9 @@ is built to work with the **Steam** version too (not tested on Steam yet).
 ## How to use
 
 1. Download `MCD2SkinStudio.exe` from the Releases page and start it. It finds the game by itself.
-2. **Make a new skin** → pick a hero → **Open in Paint**.
-3. Paint over the texture (tip: add a layer first) and save it as PNG. Don't resize it.
-   The `_guide.png` next to it shows which area is which part of the hero.
-4. Upload your PNG, check the before/after preview, press **Install**.
+2. **Make a new skin** → pick a hero → **Open design sheet in Paint**.
+3. Paint inside the squares and save as PNG. Don't resize the sheet.
+4. Upload the design sheet, check the front/back preview, press **Install**.
 5. Start the game and pick the hero in the Locker.
 
 After a game update, open the app and press **Repair** when it asks.
@@ -30,15 +29,28 @@ The exe isn't code-signed yet. Click **More info → Run anyway**. You can check
 Get-FileHash .\MCD2SkinStudio.exe -Algorithm SHA256
 ```
 
-## The texture
+## The design sheet
 
-Heroes use a 64×64 texture laid out like a Minecraft skin with slim (3-pixel) arms, with two extras:
+Every square on the design sheet is one pixel of the hero. Each body part is unfolded like a paper
+model: the big middle square is the front, top and bottom sit above and below it, and the sides and back
+are next to it, all as seen from outside. Right and left are the hero's own. Front and back previews on
+the sheet show where everything ends up.
 
-| Area | What it is |
+**Face animation.** The head's front has no eyes or mouth: the game draws and animates them from a few
+pixels in the texture's top-left corner, shown on the sheet as three stacked lines plus a block:
+
+| Sheet squares | Game uses them for |
 |---|---|
-| Top-left 8×8 | Face animation: the game draws the eyes, brows and mouth from these pixels. Leave it as is. |
-| 8×8 at x 56, y 20 | The portrait picture. Edit it to match your new face. |
-| Jacket, sleeves, pants layers | Not used by the game. |
+| Top line (2 squares) | Pupils: the eye on your left, the eye on your right |
+| Middle line (2 squares) | Eye whites: outer and inner pixel of each eye (mirrored); the pupil covers the inner one |
+| Bottom line (2 squares) | Mouth: left and right pixel, in the middle of the face |
+| Block on the left (4 × 2) | Eyebrow shape, drawn above both eyes (mirrored for the other eye) |
+
+The **portrait** (8 × 8) is the small face picture in the Locker; paint a whole face there.
+
+Experienced skin makers can upload the raw 64×64 texture instead. It is Minecraft's slim-arm layout,
+except that the legs are mirrored with their left and right regions swapped, and the head and hat backs
+are mirrored. The jacket, sleeve and pants layers aren't used by the game.
 
 ## Building
 

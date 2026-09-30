@@ -121,7 +121,7 @@ sealed class WizardPage : FlowLayoutPanel
         {
             if (!_originals.TryGetValue(s.Key, out var img)) continue;
             var col = Ui.Column();
-            var pic = Ui.Picture(Ui.ToBitmap(SkinRender.Front(img, portraitFace: true), 4, checker: false));
+            var pic = Ui.Picture(Ui.ToBitmap(SkinRender.Front(img), 4, checker: false));
             pic.Margin = new Padding(22, 0, 22, 4);
             col.Controls.Add(pic);
             var name = Ui.Label(s.DisplayName, Ui.Bold);
@@ -154,65 +154,54 @@ sealed class WizardPage : FlowLayoutPanel
     async Task StepDownload()
     {
         var s = _skin!;
-        Heading($"Paint your {s.DisplayName}", "The hero's texture was saved to your Documents folder. Open it in Paint, paint over it, and save it.");
+        Heading($"Paint your {s.DisplayName}", "Your design sheet was saved to your Documents folder. Open it in Paint, paint inside the squares, and save it.");
         ExportResult? r = null;
-        string? mine = null;
-        if (!await _f.Busy($"Saving the {s.DisplayName} texture…", () =>
+        if (!await _f.Busy($"Making the {s.DisplayName} design sheet…", () =>
             {
                 r = S.Export(s);
                 _original = S.Original(s);
-                var saved = S.State.Skins.FirstOrDefault(x => x.Key == s.Key);
-                var img = saved == null ? null : S.State.LoadImage(saved);
-                if (img != null)
-                {
-                    mine = Path.Combine(r.Folder, s.FileStem + "_my_version.png");
-                    Png.Save(img, mine);
-                }
             }))
         {
             Nav(true, null);
             return;
         }
         _export = r;
-        var tex = mine ?? r!.Texture;
 
         var files = Ui.Column();
         files.Controls.Add(Ui.Label("Saved to", Ui.Small, Ui.Muted));
         files.Controls.Add(Ui.Label(r!.Folder, Ui.Bold, null, W - 40));
-        files.Controls.Add(Ui.Label($"{Path.GetFileName(r.Texture)}  –  the texture to edit (64×64)\n{Path.GetFileName(r.Preview)}  –  the same, 8× bigger, easier to see\n{Path.GetFileName(r.Guide)}  –  shows which part of the hero each area is" +
-                                    (mine != null ? $"\n{Path.GetFileName(mine)}  –  your current custom version, if you want to continue from it" : ""), Ui.Small, Ui.Muted, W - 40));
+        var list = $"{Path.GetFileName(r.Sheet)}  –  the design sheet: every body part unfolded and labelled, plus the face animation and the portrait. Paint this one.\n" +
+                   $"{Path.GetFileName(r.Texture)}  –  the raw 64×64 texture, for experienced skin makers.";
+        if (r.OriginalSheet != null) list += $"\n{Path.GetFileName(r.OriginalSheet)}  –  the game's original look, if you want to start over.";
+        files.Controls.Add(Ui.Label(list, Ui.Small, Ui.Muted, W - 40));
+        if (r.KeptEarlierWork)
+            files.Controls.Add(Ui.Label("Your earlier painting on this design sheet was kept, so you can carry on where you stopped.", Ui.Small, Ui.AccentDark, W - 40));
         var buttons = Ui.Row();
         buttons.Margin = new Padding(0, 8, 0, 0);
-        buttons.Controls.Add(Ui.Primary("Open in Paint", (_, _) => MainForm.OpenInPaint(tex)));
+        buttons.Controls.Add(Ui.Primary("Open design sheet in Paint", (_, _) => MainForm.OpenInPaint(r.Sheet)));
         buttons.Controls.Add(Ui.Secondary("Open folder", (_, _) => MainForm.Open(r.Folder)));
-        buttons.Controls.Add(Ui.Secondary("Show guide", (_, _) => MainForm.Open(r.Guide)));
         files.Controls.Add(buttons);
         Add(Ui.Card(files));
 
-        var pics = Ui.Row();
-        pics.Controls.Add(Ui.Picture(Ui.ToBitmap(SkinRender.Front(_original!), 8, checker: false)));
-        pics.Controls.Add(Ui.Picture(Ui.ToBitmap(_original!, 4)));
-        Add(pics);
-
-        Add(Ui.Label("Three tips", Ui.H2));
+        Add(Ui.Label("How the design sheet works", Ui.H2));
         var tips = Ui.Row();
         tips.MaximumSize = new Size(W, 0);
-        tips.Controls.Add(Tip("1  Add a layer", "In Paint, click Layers on the toolbar and add a new layer. Paint on it, so the original stays underneath."));
-        tips.Controls.Add(Tip("2  Don't resize", "Keep the picture 64×64. To see better, zoom in with Ctrl + mouse wheel, never with Resize."));
-        tips.Controls.Add(Tip("3  Save as PNG", "File › Save as › PNG picture. Transparent areas must stay transparent."));
+        tips.Controls.Add(Tip("Every square is one pixel", "Each body part is unfolded like a paper model: the big middle square is the front, the sides are next to it. Right and left are the hero's own right and left."));
+        tips.Controls.Add(Tip("Eyes, eyebrows and mouth", "The head has no face drawn on it: the game animates the face from the “Face animation” squares. Pupils, eye whites and mouth are the three lines on the right; the eyebrow shape is on the left."));
+        tips.Controls.Add(Tip("Portrait and hat", "The portrait is the small face picture in the Locker: paint a whole face there. The hat layer is drawn over the head; leave squares empty (checkered) for no hat."));
+        tips.Controls.Add(Tip("Save as PNG, don't resize", "Paint on a new layer if you like (Layers button). Never resize or crop the sheet. File › Save as › PNG picture."));
         Add(tips);
-        Add(Ui.Label("Leave the red top-left corner (face animation) as it is. Edit the yellow portrait square so the Locker picture matches your new face.", Ui.Small, Ui.Muted, W));
-        Nav(true, Ui.Primary("I've saved my picture  ›", (_, _) => Go(3)));
+        Nav(true, Ui.Primary("I've saved my design sheet  ›", (_, _) => Go(3)));
     }
 
     Control Tip(string title, string text)
     {
         var col = Ui.Column();
         col.Controls.Add(Ui.Label(title, Ui.Bold));
-        col.Controls.Add(Ui.Label(text, Ui.Small, Ui.Muted, 230));
+        col.Controls.Add(Ui.Label(text, Ui.Small, Ui.Muted, 204));
         var c = Ui.Card(col);
         c.Margin = new Padding(0, 0, 12, 12);
-        c.MinimumSize = new Size(262, 0);
+        c.MinimumSize = new Size(236, 0);
         return c;
     }
 
@@ -220,7 +209,7 @@ sealed class WizardPage : FlowLayoutPanel
     void StepUpload()
     {
         var s = _skin!;
-        Heading("Upload your picture", $"Drop the PNG you saved, or browse for it. You'll see your {s.DisplayName} next to the original before anything is installed.");
+        Heading("Upload your design sheet", $"Drop the design sheet you painted (or a 64×64 texture), or browse for it. You'll see your {s.DisplayName} next to the original before anything is installed.");
         var next = Ui.Primary("Install  ›", (_, _) => Go(4));
         next.Enabled = _edited != null;
 
@@ -230,7 +219,7 @@ sealed class WizardPage : FlowLayoutPanel
             using var pen = new Pen(Ui.Accent, 2) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dash };
             e.Graphics.DrawRectangle(pen, 1, 1, drop.Width - 3, drop.Height - 3);
         };
-        var dropText = Ui.Label("Drop your edited PNG here", Ui.H2, Ui.AccentDark);
+        var dropText = Ui.Label("Drop your design sheet here", Ui.H2, Ui.AccentDark);
         dropText.Location = new Point(24, 22);
         var browse = Ui.Secondary("Browse…", (_, _) => { });
         browse.Location = new Point(24, 62);
@@ -245,15 +234,20 @@ sealed class WizardPage : FlowLayoutPanel
         {
             try
             {
-                var img = SkinImport.Load(path);
+                var up = SkinImport.Load(path, _original!, s.Key);
+                if (up.SheetMatchesSkin == false &&
+                    !_f.Ask($"This design sheet was made for a different hero. Use it for {s.DisplayName} anyway?", "Different hero"))
+                    return;
+                var img = up.Skin;
                 if (SkinImport.Unchanged(_original!, img))
                 {
-                    _f.Warn("This picture is still exactly the original skin. Paint your changes, save the file, then upload it again.");
+                    _f.Warn("This is still exactly the original skin. Paint your changes, save the file, then upload it again.");
                     return;
                 }
-                if (SkinImport.PaletteChanged(_original!, img) &&
-                    _f.Ask("Your picture changed the top-left corner. The game uses those pixels to animate the eyes, eyebrows and mouth.\n\nKeep the game's face animation? (recommended)\n\nYes: put the game's corner back.\nNo: keep your pixels (the face may look strange in-game).", "Face animation"))
-                    img = SkinImport.RestorePalette(_original!, img);
+                if (SkinImport.LostTransparency(_original!, img) is uint lost &&
+                    _f.Ask("The empty (checkered) squares, such as the hat layer, were filled with one colour. Some paint programs do that when they save.\n\n" +
+                           "Make those squares empty again? (recommended)\n\nYes: they stay invisible in the game.\nNo: keep the colour (the hero gets a solid hat box).", "Empty squares"))
+                    img = SkinImport.RestoreTransparency(_original!, img, lost);
                 _edited = img;
                 ShowCompare(compare);
                 next.Enabled = true;
@@ -294,11 +288,11 @@ sealed class WizardPage : FlowLayoutPanel
     static Control Side(string title, RgbaImage img)
     {
         var col = Ui.Column();
-        col.Controls.Add(Ui.Label(title, Ui.H2));
+        col.Controls.Add(Ui.Label(title + "  (front and back)", Ui.H2));
         var row = Ui.Row();
         row.WrapContents = false;
         row.Controls.Add(Ui.Picture(Ui.ToBitmap(SkinRender.Front(img), 8, checker: false)));
-        row.Controls.Add(Ui.Picture(Ui.ToBitmap(img, 4)));
+        row.Controls.Add(Ui.Picture(Ui.ToBitmap(SkinRender.Back(img), 8, checker: false)));
         col.Controls.Add(row);
         var c = Ui.Card(col);
         c.Margin = new Padding(0, 0, 14, 14);

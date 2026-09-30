@@ -21,12 +21,20 @@ sealed class HelpPage : FlowLayoutPanel
         Section("How it works",
             "MCD2 Skin Studio copies a hero's texture out of your own game, lets you paint it, and puts your version in the game's “~mods” folder. " +
             "The game's own files are never changed. “Remove all custom skins” deletes only the files this app made.");
-        Section("Painting tips",
-            "•  Paint over the texture you downloaded. Don't resize it: it must stay 64×64 pixels.\n" +
-            "•  The guide picture shows which area is which part of the hero. Gray areas aren't used by the game.\n" +
-            "•  Leave the red top-left corner alone: the game uses it to animate eyes, eyebrows and mouth.\n" +
-            "•  The yellow square is the portrait picture. Edit it to match your new face.\n" +
-            "•  Save as PNG. Windows 11 Paint (with layers) or photopea.com both work.");
+        Section("The design sheet",
+            "•  Every square on the design sheet is one pixel of your hero. Paint inside the squares; the grid lines don't matter.\n" +
+            "•  Each body part is unfolded like a paper model: the big middle square is the front, the top and bottom are above and below it, " +
+            "and the sides and back are next to it. Right and left are the hero's own right and left.\n" +
+            "•  The front and back previews on the sheet show where everything ends up.\n" +
+            "•  Keep head, body, arms and legs solid. The hat layer and the eyebrows may have empty (checkered) squares.\n" +
+            "•  Save as PNG and never resize or crop the sheet. Windows 11 Paint (with layers) or photopea.com both work.");
+        Section("Eyes, eyebrows and mouth",
+            "The head's front has no face on it: the game draws and animates the face from the “Face animation” squares.\n" +
+            "•  Top line: the pupils (left square = the eye on your left, right square = the eye on your right).\n" +
+            "•  Middle line: the eye whites, two pixels per eye (outer and inner; the pupil covers the inner one).\n" +
+            "•  Bottom line: the mouth, two pixels in the middle of the face.\n" +
+            "•  The block on the left is the eyebrow shape (4 × 2). It's drawn above both eyes, mirrored for the other eye.\n" +
+            "•  The portrait is the small face picture in the Locker. Paint a whole face there, with eyes and mouth.");
         Section("After a game update",
             "Game updates can remove or break custom skins. Open MCD2 Skin Studio: it notices the update and offers Repair, which rebuilds your skins for the new version.");
 

@@ -69,3 +69,50 @@ public class GameTests
         Directory.Delete(dir, true);
     }
 }
+
+public class GameGeometryTests
+{
+    /// <summary>The in-game face built from SkinGeometry must match the game's own hand-drawn portraits
+    /// better than its mirror image: proves the face-animation mapping and left/right orientation.</summary>
+    [GameFact]
+    public void In_game_face_matches_the_games_portraits()
+    {
+        var k = new KeyProvider().Resolve(GameTests.Install!)!;
+        using var a = GameArchive.Open(GameTests.Install!, k.Key);
+        int closer = 0, exact = 0;
+        foreach (var s in a.Catalog.Skins)
+        {
+            var img = TextureIO.ExtractSkin(a.ReadPackage(s.TexturePath));
+            var face = SkinGeometry.FaceAsSeen(img);
+            long d = 0, dm = 0;
+            for (int y = 0; y < 8; y++)
+                for (int x = 0; x < 8; x++)
+                {
+                    var p = RgbaImage.Unpack(img.Get(SkinGeometry.PortraitX + x, SkinGeometry.PortraitY + y));
+                    var f = RgbaImage.Unpack(face.Get(x, y));
+                    var m = RgbaImage.Unpack(face.Get(7 - x, y));
+                    d += Math.Abs(p.R - f.R) + Math.Abs(p.G - f.G) + Math.Abs(p.B - f.B);
+                    dm += Math.Abs(p.R - m.R) + Math.Abs(p.G - m.G) + Math.Abs(p.B - m.B);
+                }
+            if (d <= dm) closer++;
+            if (d == 0) exact++;
+        }
+        Assert.Equal(a.Catalog.Skins.Count, closer);
+        Assert.True(exact >= 5, $"only {exact} exact portrait matches");
+    }
+
+    [GameFact]
+    public void Every_stock_skin_survives_a_design_sheet_round_trip()
+    {
+        var k = new KeyProvider().Resolve(GameTests.Install!)!;
+        using var a = GameArchive.Open(GameTests.Install!, k.Key);
+        foreach (var s in a.Catalog.Skins)
+        {
+            var img = TextureIO.ExtractSkin(a.ReadPackage(s.TexturePath));
+            var sheet = Png.Decode(Png.Encode(DesignSheet.Create(img, s.DisplayName, s.Key)));
+            Assert.True(DesignSheet.Read(sheet, img).SameAs(img), s.Key);
+            Assert.True(SkinImport.Unchanged(img, DesignSheet.Read(sheet, img)));
+            Assert.Null(SkinImport.LostTransparency(img, img));
+        }
+    }
+}

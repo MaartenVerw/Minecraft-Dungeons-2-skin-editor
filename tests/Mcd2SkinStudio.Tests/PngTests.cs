@@ -43,47 +43,4 @@ public class PngTests
     {
         Assert.Throws<InvalidDataException>(() => Png.Load(Fx("notapng.png")));
     }
-
-    [Fact]
-    public void Import_accepts_64_and_exact_512()
-    {
-        var a = SkinImport.Load(Fx("rgba64.png"));
-        var b = SkinImport.Load(Fx("rgba512_exact.png"));
-        Assert.True(a.SameAs(b));
-    }
-
-    [Theory]
-    [InlineData("rgba512_blurry.png")]
-    [InlineData("rgba100.png")]
-    [InlineData("notapng.png")]
-    [InlineData("missing.png")]
-    public void Import_rejects_with_a_friendly_message(string name)
-    {
-        var e = Assert.Throws<SkinImageException>(() => SkinImport.Load(Fx(name)));
-        Assert.False(string.IsNullOrWhiteSpace(e.Message));
-    }
-
-    [Fact]
-    public void Palette_change_is_detected_and_restorable()
-    {
-        var orig = Png.Load(Fx("rgba64.png"));
-        var edit = orig.Clone();
-        edit.Set(30, 30, RgbaImage.Pack(1, 2, 3, 255));
-        Assert.False(SkinImport.PaletteChanged(orig, edit));
-        edit.Set(6, 5, RgbaImage.Pack(9, 9, 9, 255));
-        Assert.True(SkinImport.PaletteChanged(orig, edit));
-        var fixedUp = SkinImport.RestorePalette(orig, edit);
-        Assert.False(SkinImport.PaletteChanged(orig, fixedUp));
-        Assert.Equal(RgbaImage.Pack(1, 2, 3, 255), fixedUp.Get(30, 30));
-    }
-
-    [Fact]
-    public void Guide_and_front_render_have_expected_sizes()
-    {
-        var s = Png.Load(Fx("rgba64.png"));
-        Assert.Equal((16, 32), (SkinRender.Front(s).Width, SkinRender.Front(s).Height));
-        var g = SkinRender.Guide(s);
-        Assert.Equal(1024, g.Width);
-        Assert.True(g.Height > 1024);
-    }
 }

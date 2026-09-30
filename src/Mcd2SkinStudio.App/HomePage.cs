@@ -78,7 +78,7 @@ sealed class HomePage : FlowLayoutPanel
         grid.Margin = new Padding(0, 0, 0, 8);
         if (S.State.Skins.Count == 0)
         {
-            grid.Controls.Add(Ui.Card(Ui.Label("No custom skins yet. Press “Make a new skin” to start: you'll get the hero's texture, paint over it in Paint, and upload it back.", null, Ui.Muted, 520)));
+            grid.Controls.Add(Ui.Card(Ui.Label("No custom skins yet. Press “Make a new skin” to start: you'll get a design sheet of the hero, paint it in Paint, and upload it back.", null, Ui.Muted, 520)));
             return grid;
         }
         foreach (var saved in S.State.Skins)
