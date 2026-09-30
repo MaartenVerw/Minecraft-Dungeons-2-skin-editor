@@ -12,14 +12,20 @@ public sealed record SkinReplacement(SkinEntry Skin, RgbaImage Image);
 /// <summary>
 /// Builds the mod container: each chosen hero's original texture package (read from the user's own
 /// game) with only its 16,384 pixel bytes replaced, plus a container header, as
-/// zzz_MCD2SkinStudio_P.utoc/.ucas and an empty .pak.
+/// zzz_MCD2SkinStudio_P.utoc/.ucas (encrypted with the game key) and an empty .pak.
 /// </summary>
 public static class ModBuilder
 {
     public const string ModName = "zzz_MCD2SkinStudio_P";
     public const string FilePrefix = "zzz_MCD2SkinStudio";
 
-    public static Dictionary<string, byte[]> Build(GameArchive game, IReadOnlyList<SkinReplacement> items, string modName = ModName, byte[]? encryptKey = null)
+    /// <summary>Builds the container, encrypted with the game's own key: Phase 0 showed the game
+    /// ignores unencrypted mod containers on the Xbox build.</summary>
+    public static Dictionary<string, byte[]> Build(GameArchive game, IReadOnlyList<SkinReplacement> items, string modName = ModName) =>
+        Build(game, items, modName, game.Key);
+
+    /// <summary>Test hook: <paramref name="encryptKey"/> null writes an unencrypted container.</summary>
+    internal static Dictionary<string, byte[]> Build(GameArchive game, IReadOnlyList<SkinReplacement> items, string modName, byte[]? encryptKey)
     {
         if (items.Count == 0) throw new ArgumentException("No skins to install");
         if (!modName.StartsWith(FilePrefix, StringComparison.Ordinal)) throw new ArgumentException("Mod name must start with " + FilePrefix);

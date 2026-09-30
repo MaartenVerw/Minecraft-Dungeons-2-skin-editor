@@ -65,7 +65,8 @@ public static class ContainerWriter
         t.Write(hdr);
         foreach (var c in chunks) t.Write(c.ChunkId);
         foreach (var (off, len) in offLen) { Bin.WriteBigEndian5(t, off); Bin.WriteBigEndian5(t, len); }
-        foreach (var s in seeds) { Span<byte> b = stackalloc byte[4]; BinaryPrimitives.WriteInt32LittleEndian(b, s); t.Write(b); }
+        Span<byte> b4 = stackalloc byte[4];
+        foreach (var s in seeds) { BinaryPrimitives.WriteInt32LittleEndian(b4, s); t.Write(b4); }
         foreach (var (off, cs, us) in blocks)
         {
             Bin.WriteLittleEndian(t, off, 5); Bin.WriteLittleEndian(t, cs, 3); Bin.WriteLittleEndian(t, us, 3); t.WriteByte(0);
@@ -76,7 +77,7 @@ public static class ContainerWriter
         return (t.ToArray(), ucas.ToArray());
     }
 
-    /// <summary>FIoStoreTocResource::HashChunkIdWithSeed (FNV-1a style, 64-bit).</summary>
+    /// <summary>FIoStoreTocResource::HashChunkIdWithSeed (FNV-1 style, 64-bit).</summary>
     public static ulong ChunkHash(ulong seed, ReadOnlySpan<byte> id)
     {
         ulong x = seed != 0 ? seed : 0xCBF29CE484222325UL;

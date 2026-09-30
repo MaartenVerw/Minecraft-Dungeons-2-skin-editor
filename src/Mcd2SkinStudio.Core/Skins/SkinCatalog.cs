@@ -3,7 +3,12 @@ namespace Mcd2SkinStudio.Core.Skins;
 /// <summary>One replaceable hero skin texture found in the game.</summary>
 public sealed record SkinEntry(string Key, string Hero, string DisplayName, string TexturePath, string? MresPath, string? IconPath)
 {
-    public string FileStem => Key;
+    /// <summary>Folder-based name ("Tank (Deluxe)"), kept for logs and support.</summary>
+    public string InternalName { get; init; } = DisplayName;
+    public bool Deluxe => TexturePath.Contains("deluxe", StringComparison.OrdinalIgnoreCase);
+    public bool PreOrder => TexturePath.Contains("preorder", StringComparison.OrdinalIgnoreCase);
+    /// <summary>Safe file name for exports, e.g. "Fancy Kellen".</summary>
+    public string FileStem => string.Concat(DisplayName.Split(Path.GetInvalidFileNameChars()));
 }
 
 /// <summary>
@@ -21,7 +26,24 @@ public sealed class SkinCatalog
 
     public SkinEntry? Find(string keyOrName) =>
         Skins.FirstOrDefault(s => s.Key.Equals(keyOrName, StringComparison.OrdinalIgnoreCase))
-        ?? Skins.FirstOrDefault(s => s.DisplayName.Equals(keyOrName, StringComparison.OrdinalIgnoreCase));
+        ?? Skins.FirstOrDefault(s => s.DisplayName.Equals(keyOrName, StringComparison.OrdinalIgnoreCase))
+        ?? Skins.FirstOrDefault(s => s.InternalName.Equals(keyOrName, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>Replaces folder-based names with the game's own skin names where the table has a row.</summary>
+    public SkinCatalog WithNames(IReadOnlyList<SkinNames.Row> rows)
+    {
+        var named = Skins.Select(s =>
+        {
+            var row = rows.FirstOrDefault(r => r.Folder.Equals(s.Hero, StringComparison.OrdinalIgnoreCase) && r.Deluxe == s.Deluxe && r.PreOrder == s.PreOrder)
+                      ?? rows.FirstOrDefault(r => r.Folder.Equals(s.Hero, StringComparison.OrdinalIgnoreCase) && r.Deluxe == s.Deluxe);
+            return row == null ? s : s with { DisplayName = row.Name, InternalName = s.InternalName };
+        }).ToList();
+        // two skins must never share a display name
+        foreach (var g in named.GroupBy(s => s.DisplayName, StringComparer.OrdinalIgnoreCase).Where(g => g.Count() > 1).ToList())
+            foreach (var s in g.Skip(1).ToList())
+                named[named.IndexOf(s)] = s with { DisplayName = s.DisplayName + " (" + s.InternalName + ")" };
+        return new SkinCatalog(named.OrderBy(s => s.DisplayName, StringComparer.OrdinalIgnoreCase).ToList());
+    }
 
     public static SkinCatalog Build(IEnumerable<string> archivePaths)
     {

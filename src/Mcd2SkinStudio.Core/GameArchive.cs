@@ -11,11 +11,24 @@ public sealed class GameArchive : IDisposable
     public IoStoreReader Reader { get; }
     public ContainerHeader Header { get; }
     public SkinCatalog Catalog { get; }
+    /// <summary>The key that opened this archive; mod containers are encrypted with it.</summary>
+    public byte[] Key { get; }
 
-    GameArchive(GameInstall install, IoStoreReader reader, ContainerHeader header)
+    GameArchive(GameInstall install, IoStoreReader reader, ContainerHeader header, byte[] key)
     {
-        Install = install; Reader = reader; Header = header;
-        Catalog = SkinCatalog.Build(reader.Files.Keys);
+        Install = install; Reader = reader; Header = header; Key = key;
+        var catalog = SkinCatalog.Build(reader.Files.Keys);
+        try
+        {
+            var pakPath = Path.ChangeExtension(install.UtocPath, ".pak");
+            using var pak = PakReader.Open(pakPath, key);
+            catalog = catalog.WithNames(SkinNames.Load(pak));
+        }
+        catch (Exception e) when (e is IOException or InvalidDataException or NotSupportedException or System.Text.Json.JsonException)
+        {
+            Log.Error("Could not read the game's skin names; using folder names", e);
+        }
+        Catalog = catalog;
     }
 
     public static GameArchive Open(GameInstall install, byte[] key)
@@ -26,7 +39,7 @@ public sealed class GameArchive : IDisposable
             int hi = r.FindChunkOfType(IoStoreReader.ChunkTypeContainerHeader);
             if (hi < 0) throw new InvalidDataException("The game archive has no container header.");
             var h = ContainerHeader.Parse(r.ReadChunk(hi));
-            return new GameArchive(install, r, h);
+            return new GameArchive(install, r, h, key);
         }
         catch
         {
