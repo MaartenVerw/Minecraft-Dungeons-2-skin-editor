@@ -159,6 +159,13 @@ public static class Installer
         ApplyFiles(g, files, marker);
     }
 
+    /// <summary>Best-effort removal of a staged install once the elevated copy is done or was refused.</summary>
+    public static void DeleteStage(string stageDir)
+    {
+        try { if (Directory.Exists(stageDir)) Directory.Delete(stageDir, true); }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
+    }
+
     /// <summary>Uninstall: deletes only files listed in the marker (and named like ours), then the marker.
     /// Returns how many files were removed.</summary>
     public static int Uninstall(GameInstall g)

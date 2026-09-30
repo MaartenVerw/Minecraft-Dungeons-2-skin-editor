@@ -84,7 +84,7 @@ public class InstallerTests : IDisposable
 
     public InstallerTests()
     {
-        _root = Directory.CreateTempSubdirectory("mcd2game").FullName;
+        _root = TestData.NewDir("game");
         var paks = Path.Combine(_root, "Dungeons", "Content", "Paks");
         Directory.CreateDirectory(paks);
         var utoc = new byte[0x90];
@@ -166,6 +166,9 @@ public class InstallerTests : IDisposable
         Assert.Equal(InstallState.Ok, Installer.Check(_game));
         File.WriteAllBytes(Path.Combine(stage, ModBuilder.ModName + ".pak"), [0]);
         Assert.Throws<InvalidDataException>(() => Installer.ApplyStage(_game, stage));
+        Installer.DeleteStage(stage);
+        Assert.False(Directory.Exists(stage));
+        Installer.DeleteStage(stage);   // already gone: no error
     }
 
     [Theory]

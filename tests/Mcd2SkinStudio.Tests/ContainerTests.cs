@@ -29,7 +29,7 @@ public class ContainerTests
         var header = ContainerHeader.Write(0xABCDEF, chunks.Select(c => (BinaryPrimitives.ReadUInt64LittleEndian(c.ChunkId), new StoreEntry(new byte[16], new byte[20]))).ToList());
         chunks.Add(new ModChunk(ChunkId(0xABCDEF, IoStoreReader.ChunkTypeContainerHeader), header, null));
         var (utoc, ucas) = ContainerWriter.Write(chunks, key);
-        var dir = Directory.CreateTempSubdirectory("mcd2test").FullName;
+        var dir = TestData.NewDir("container");
         var p = Path.Combine(dir, "zzz_Test_P.utoc");
         File.WriteAllBytes(p, utoc);
         File.WriteAllBytes(Path.ChangeExtension(p, ".ucas"), ucas);
