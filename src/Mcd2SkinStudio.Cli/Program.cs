@@ -40,6 +40,21 @@ static class Program
                     foreach (var f in Directory.GetFiles(g.ModsDir)) Console.WriteLine($"  {Path.GetFileName(f)}  {new FileInfo(f).Length} bytes");
                     return 0;
                 }
+                case "pakdump":
+                {
+                    // pakdump <substring> <outDir>: copy matching loose files out of the game's .pak (read-only)
+                    var g = Locate(gameArg);
+                    var k = new KeyProvider().Resolve(g) ?? throw new Exception("No known key opens this game version.");
+                    using var pak = Mcd2SkinStudio.Core.IoStore.PakReader.Open(Path.Combine(g.PaksDir, g.TocName + ".pak"), k.Key);
+                    Directory.CreateDirectory(rest[1]);
+                    foreach (var f in pak.Files.Keys.Where(f => f.Contains(rest[0], StringComparison.OrdinalIgnoreCase)))
+                    {
+                        var data = pak.Read(f);
+                        File.WriteAllBytes(Path.Combine(rest[1], f.Replace("../../../", "").Replace('/', '_')), data);
+                        Console.WriteLine($"{f}  {data.Length}");
+                    }
+                    return 0;
+                }
                 case "uninstall":
                 {
                     var g = Locate(gameArg);
