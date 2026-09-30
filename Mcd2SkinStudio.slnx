@@ -1,9 +1,13 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Mcd2SkinStudio.App/Mcd2SkinStudio.App.csproj" />
     <Project Path="src/Mcd2SkinStudio.Cli/Mcd2SkinStudio.Cli.csproj" />
     <Project Path="src/Mcd2SkinStudio.Core/Mcd2SkinStudio.Core.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Mcd2SkinStudio.Tests/Mcd2SkinStudio.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/UiShots/UiShots.csproj" />
   </Folder>
 </Solution>

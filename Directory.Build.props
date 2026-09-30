@@ -8,5 +8,6 @@
     <Authors>maartenverw06</Authors>
     <Product>MCD2 Skin Studio</Product>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 </Project>

@@ -5,13 +5,20 @@ namespace Mcd2SkinStudio.Core.Skins;
 /// <summary>Pictures made from a 64×64 skin: a flat front view for tiles, and the editing guide.</summary>
 public static class SkinRender
 {
-    /// <summary>16×32 flat front view: head+hat, body, slim arms, legs (front faces only).</summary>
-    public static RgbaImage Front(RgbaImage s)
+    /// <summary>16×32 flat front view: head+hat, body, slim arms, legs (front faces only).
+    /// <paramref name="portraitFace"/> uses the portrait square instead, which has the eyes and mouth
+    /// drawn in (the head texture has none: the game animates them).</summary>
+    public static RgbaImage Front(RgbaImage s, bool portraitFace = false)
     {
         var o = new RgbaImage(16, 32);
         void Put(int sx, int sy, int w, int h, int dx, int dy) => o.Composite(s.Crop(sx, sy, w, h), dx, dy);
-        Put(8, 8, 8, 8, 4, 0);     // head front
-        Put(40, 8, 8, 8, 4, 0);    // hat front
+        if (portraitFace)
+            Put(SkinLayout.Portrait.X, SkinLayout.Portrait.Y, 8, 8, 4, 0);
+        else
+        {
+            Put(8, 8, 8, 8, 4, 0);     // head front
+            Put(40, 8, 8, 8, 4, 0);    // hat front
+        }
         Put(20, 20, 8, 12, 4, 8);  // body front
         Put(44, 20, 3, 12, 1, 8);  // right arm (viewer's left)
         Put(36, 52, 3, 12, 12, 8); // left arm

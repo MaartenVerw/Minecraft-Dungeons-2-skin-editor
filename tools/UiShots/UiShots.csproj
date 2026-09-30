@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Dev tool: renders the app's pages to PNGs for review. Not part of the release. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Mcd2SkinStudio.App\Mcd2SkinStudio.App.csproj" />
+  </ItemGroup>
+
+</Project>

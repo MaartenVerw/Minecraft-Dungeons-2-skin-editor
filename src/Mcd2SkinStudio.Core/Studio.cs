@@ -14,6 +14,14 @@ public enum Health { NoGame, KeyUnknown, NothingInstalled, Ok, NeedsRepair }
 
 public sealed record HealthReport(Health Health, InstallState Install, string Message);
 
+/// <summary>Runs one file operation as administrator when ~mods isn't writable (the app relaunches
+/// itself with runas; the CLI has none). Returns false when the user declines.</summary>
+public interface IElevator
+{
+    bool ApplyStage(string stageDir, GameInstall game);
+    bool Uninstall(GameInstall game);
+}
+
 /// <summary>A user-facing failure: the message says what happened and the one thing to do.</summary>
 public sealed class StudioException(string message) : Exception(message);
 
@@ -31,6 +39,9 @@ public sealed class Studio : IDisposable
     public IReadOnlyList<GameInstall> Installs { get; private set; } = [];
     public GameInstall? Game { get; private set; }
     public ResolvedKey? Key { get; private set; }
+    public IElevator? Elevator { get; set; }
+
+    const string ElevationDeclined = "Windows didn't allow writing to the game's mods folder. Try again and choose Yes when Windows asks for permission.";
 
     GameArchive? _archive;
 
@@ -150,7 +161,7 @@ public sealed class Studio : IDisposable
         var g = RequireGame();
         if (State.Skins.Count == 0)
         {
-            Installer.Uninstall(g);
+            UninstallFiles();
             return new InstallResult(0, []);
         }
         var a = Archive();
@@ -171,15 +182,37 @@ public sealed class Studio : IDisposable
         if (items.Count == 0) throw new StudioException("None of your saved skins match this game version. Make them again with 'Make a new skin'.");
         var files = ModBuilder.Build(a, items);
         var marker = Installer.NewMarker(g, items.Select(i => i.Skin.DisplayName), files, AppVersion);
-        Installer.Install(g, files, marker);
+        try
+        {
+            Installer.Install(g, files, marker);
+        }
+        catch (NeedsElevationException e)
+        {
+            if (Elevator?.ApplyStage(e.StageDir, g) != true) throw new StudioException(ElevationDeclined);
+        }
         return new InstallResult(items.Count, skipped);
+    }
+
+    /// <summary>Removes this app's files from ~mods (asking for permission if needed).</summary>
+    public int UninstallFiles()
+    {
+        var g = RequireGame();
+        try
+        {
+            return Installer.Uninstall(g);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            int before = Installer.ReadMarker(g)?.Files.Count ?? 0;
+            if (Elevator?.Uninstall(g) != true) throw new StudioException(ElevationDeclined);
+            return before;
+        }
     }
 
     /// <summary>Removes every custom skin from the game and forgets them.</summary>
     public int RemoveAll()
     {
-        var g = RequireGame();
-        int n = Installer.Uninstall(g);
+        int n = UninstallFiles();
         foreach (var s in State.Skins.ToList()) State.Remove(s.Key);
         State.Save();
         return n;
@@ -214,7 +247,7 @@ public sealed class Studio : IDisposable
         if (k == null) throw new StudioException(KeyUnknownMessage);
         if (State.Skins.Count == 0)
         {
-            int removed = Installer.Uninstall(Game!);
+            int removed = UninstallFiles();
             return removed > 0 ? "Old skin files were removed. The game looks normal again." : "There are no custom skins to repair.";
         }
         var r = InstallAll();

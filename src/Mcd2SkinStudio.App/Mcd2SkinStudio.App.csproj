@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>MCD2SkinStudio</AssemblyName>
+    <RootNamespace>Mcd2SkinStudio.App</RootNamespace>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <ApplicationVisualStyles>true</ApplicationVisualStyles>
+    <ApplicationDefaultFont>Segoe UI, 9.75pt</ApplicationDefaultFont>
+  </PropertyGroup>
+
+  <!-- dotnet publish -c Release: one self-contained exe, nothing to install -->
+  <PropertyGroup>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>embedded</DebugType>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mcd2SkinStudio.Core\Mcd2SkinStudio.Core.csproj" />
+    <EmbeddedResource Include="icon256.png" LogicalName="icon256.png" />
+    <InternalsVisibleTo Include="UiShots" />
+  </ItemGroup>
+
+</Project>

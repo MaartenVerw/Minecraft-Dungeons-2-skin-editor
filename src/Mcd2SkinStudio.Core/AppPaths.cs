@@ -3,10 +3,13 @@ namespace Mcd2SkinStudio.Core;
 /// <summary>Where the app keeps its own files. Nothing here is inside the game folder.</summary>
 public static class AppPaths
 {
-    static string? _dataOverride;
+    static string? _dataOverride, _exportOverride;
 
-    /// <summary>For tests: redirect %APPDATA%\MCD2SkinStudio somewhere else.</summary>
+    /// <summary>For tests and screenshots: redirect %APPDATA%\MCD2SkinStudio somewhere else.</summary>
     public static void OverrideDataDir(string? dir) => _dataOverride = dir;
+
+    /// <summary>For tests and screenshots: redirect Documents\MCD2 Skin Studio somewhere else.</summary>
+    public static void OverrideExportDir(string? dir) => _exportOverride = dir;
 
     public static string DataDir
     {
@@ -28,7 +31,7 @@ public static class AppPaths
     {
         get
         {
-            var d = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "MCD2 Skin Studio");
+            var d = _exportOverride ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "MCD2 Skin Studio");
             Directory.CreateDirectory(d);
             return d;
         }
