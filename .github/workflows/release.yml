@@ -1,5 +1,5 @@
-# Builds, tests and publishes MCD2SkinStudio.exe. Runs only on version tags (v*) or by hand, so a
-# private repo doesn't spend Actions minutes on every push (Windows runners count double).
+# Builds, tests and publishes MCD2SkinStudio.exe. Runs on version tags (v*), which create a GitHub
+# release, or by hand (build artifact only).
 name: release
 
 on:

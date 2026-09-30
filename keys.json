@@ -1,5 +1,5 @@
 {
-  "comment": "Archive keys for Minecraft Dungeons II. Found with tools/find_aes_key.py from the maintainer's own copy of the game. The app tries matching entries first, then every key.",
+  "comment": "Archive keys for Minecraft Dungeons II. Found by the maintainer from their own copy of the game. The app tries matching entries first, then every key.",
   "keys": [
     {
       "edition": "WinGDK",
