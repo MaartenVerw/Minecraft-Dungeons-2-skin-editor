@@ -1,6 +1,6 @@
 # Minecraft Dungeons II Skin Editor
 
-[![Latest release](https://img.shields.io/github/v/release/maartenverw06/Minecraft-Dungeons-2-skin-editor?label=download)](https://github.com/maartenverw06/Minecraft-Dungeons-2-skin-editor/releases/latest)
+[![Latest release](https://img.shields.io/github/v/release/MaartenVerw/Minecraft-Dungeons-2-skin-editor?label=download)](https://github.com/MaartenVerw/Minecraft-Dungeons-2-skin-editor/releases/latest)
 ![Windows 10/11](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078d4)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -17,7 +17,7 @@ The app is called **MCD2 Skin Studio**.
 
 ## Download
 
-**[Download the latest `MCD2SkinStudio.exe`](https://github.com/maartenverw06/Minecraft-Dungeons-2-skin-editor/releases/latest)**
+**[Download the latest `MCD2SkinStudio.exe`](https://github.com/MaartenVerw/Minecraft-Dungeons-2-skin-editor/releases/latest)**
 (about 50 MB, Windows 10 or 11, 64-bit).
 
 | Game version | Status |

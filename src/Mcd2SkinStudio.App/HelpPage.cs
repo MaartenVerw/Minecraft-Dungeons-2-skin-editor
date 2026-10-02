@@ -6,7 +6,7 @@ namespace Mcd2SkinStudio.App;
 /// <summary>Help: how it works, editing tips, "It didn't work?" with Repair and a pre-filled issue.</summary>
 sealed class HelpPage : FlowLayoutPanel
 {
-    public const string RepoUrl = "https://github.com/maartenverw06/Minecraft-Dungeons-2-skin-editor";
+    public const string RepoUrl = "https://github.com/MaartenVerw/Minecraft-Dungeons-2-skin-editor";
 
     public HelpPage(MainForm f)
     {

@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <Version>0.3.0</Version>
-    <Authors>maartenverw06</Authors>
+    <Authors>MaartenVerw</Authors>
     <Product>MCD2 Skin Studio</Product>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <DebugType>embedded</DebugType>

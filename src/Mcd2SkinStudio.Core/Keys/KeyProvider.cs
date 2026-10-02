@@ -51,7 +51,7 @@ public sealed record ResolvedKey(byte[] Key, KeyEntry Entry, KeySource Source, b
 /// </summary>
 public sealed class KeyProvider
 {
-    public const string RemoteUrl = "https://raw.githubusercontent.com/maartenverw06/Minecraft-Dungeons-2-skin-editor/main/keys.json";
+    public const string RemoteUrl = "https://raw.githubusercontent.com/MaartenVerw/Minecraft-Dungeons-2-skin-editor/main/keys.json";
     static readonly TimeSpan RemoteTimeout = TimeSpan.FromSeconds(5);
 
     readonly List<(KeyEntry Entry, KeySource Source)> _entries = [];
