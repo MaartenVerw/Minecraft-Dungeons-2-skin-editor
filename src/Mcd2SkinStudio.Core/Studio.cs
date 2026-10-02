@@ -227,7 +227,9 @@ public sealed class Studio : IDisposable
         }
         catch (NeedsElevationException e)
         {
-            if (Elevator?.ApplyStage(e.StageDir, g) != true) throw new StudioException(ElevationDeclined);
+            // the elevated helper deletes the stage too, but not when the prompt is declined or fails
+            try { if (Elevator?.ApplyStage(e.StageDir, g) != true) throw new StudioException(ElevationDeclined); }
+            finally { Installer.DeleteStage(e.StageDir); }
         }
         return new InstallResult(items.Count, skipped);
     }

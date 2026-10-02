@@ -42,8 +42,7 @@ static class Program
         }
         finally
         {
-            if (stageToDelete != null)
-                try { Directory.Delete(stageToDelete, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+            if (stageToDelete != null) Installer.DeleteStage(stageToDelete);
         }
     }
 

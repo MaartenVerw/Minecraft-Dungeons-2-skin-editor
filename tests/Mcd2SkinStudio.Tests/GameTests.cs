@@ -58,7 +58,7 @@ public class GameTests
         var img = TextureIO.ExtractSkin(a.ReadPackage(s.TexturePath));
         img.FillRect(20, 20, 8, 12, RgbaImage.Pack(255, 0, 0, 255));
         var files = ModBuilder.Build(a, [new SkinReplacement(s, img)]);
-        var dir = Directory.CreateTempSubdirectory("mcd2mod").FullName;
+        var dir = TestData.NewDir("mod");
         foreach (var (n, d) in files) File.WriteAllBytes(Path.Combine(dir, n), d);
         using var r = IoStoreReader.Open(Path.Combine(dir, ModBuilder.ModName + ".utoc"), a.Key);
         Assert.True(r.Encrypted);
